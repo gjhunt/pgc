@@ -1,0 +1,22 @@
+Package: pgc
+Title: Poisson-Gamma estimates for combined clinical trials
+Version: 0.0.1.0000
+Authors@R: 
+    person("Gregory", "Hunt", , "ghunt@wm.edu", role = c("aut", "cre"),
+           comment = c(ORCID = "0000-0001-7794-8404"))
+    person("Anh", "Ninh", , "atninh@wm.edu", role = c("aut", "cre"),
+           comment = c(ORCID = "0000-0001-7794-8404"))
+Description: Estimate parameters for the Poisson-Gamma model using summary-level data from combined clinical trials.
+License: GPL (>= 3)
+Encoding: UTF-8
+Roxygen: list(markdown = TRUE)
+RoxygenNote: 7.2.3
+Imports:
+	nloptr,
+	extraDistr
+Suggests: 
+    knitr,
+    rmarkdown,
+    testthat (>= 3.0.0)
+VignetteBuilder: knitr
+Config/testthat/edition: 3

@@ -1,0 +1,80 @@
+---
+title: "Basic usage of PGC"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{basic_usage}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+```
+
+First we'll load up the package.
+
+```{r setup}
+library(pgc)
+```
+
+Now we need some example summary trial data. Let's generate some sequences of $T$ (time to completion for the trials), $N$, the number of centers, and $n$, the number of recruits per center
+
+```{r}
+# number of trials
+samplesize = 50
+
+N_seq = sapply(1:samplesize,function(i){
+    x = rnbinom(1,mu=50,size=5)
+    while(x<50)
+        x = rnbinom(1,mu=50,size=5)
+    return(x)
+})
+```
+
+```{r}
+n_seq = sapply(5*N_seq,function(m){
+    x = rnbinom(1,mu=m,size=5)
+    return(x)
+})
+```
+
+```{r}
+N_seq[N_seq==0] = 1
+n_seq[n_seq==0] = 1
+
+head(N_seq)
+head(n_seq)
+```
+
+Now we'll generate the sequence of times given true values of $\alpha$ and $\beta$
+
+```{r}
+require('extraDistr')
+
+true_alpha = 0.05
+true_beta = 0.1
+
+T_seq = sapply(1:samplesize,function(i)
+            suppressWarnings({extraDistr::rbetapr(1,shape1=n_seq[i],shape2=true_alpha*N_seq[i],scale=true_beta)
+    }))
+
+head(T_seq)
+```
+
+We can estimate the MLEs for $\phi=\frac{\alpha}{\beta}$ and $\beta$ using `pgc`
+
+```{r}
+out = pgc::estimate(T_seq=T_seq,N_seq=N_seq,n_seq=n_seq,
+                    verbose=TRUE)
+```
+
+and then look at the output
+
+```{r}
+out
+```
+
+We can see that these estimates are pretty close to our true values for $\phi$ and $\beta$.

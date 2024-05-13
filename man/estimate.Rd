@@ -4,18 +4,7 @@
 \alias{estimate}
 \title{Estimate poisson parameters phi = alpha/beta and beta from sequence of times (T), number of centers (N), and number of recruits (n), across a collection of clinical trials.}
 \usage{
-estimate(
-  T_seq,
-  N_seq,
-  n_seq,
-  maxiter = 1000,
-  N_restart = 3,
-  phi0 = NULL,
-  beta0 = NULL,
-  phi_bnds = NULL,
-  beta_bnds = NULL,
-  verbose = FALSE
-)
+estimate(T_seq, N_seq, n_seq, beta0 = NULL, beta_bnds = NULL)
 }
 \arguments{
 \item{T_seq}{Sequence of recruitment times across trials.}
@@ -24,28 +13,18 @@ estimate(
 
 \item{n_seq}{Sequence of number of recruits across trials.}
 
-\item{maxiter}{Max number of coordinate descent iterations.}
-
-\item{N_restart}{Number of restarts for initial randomization of coordinate descent variables.}
-
-\item{phi0}{Initial estimate for phi for coordinate descent. If not specified, phi0 is randomly chosen uniformly between phi_bnds.}
-
 \item{beta0}{Initial estimate for beta for coordinate descent. If not specified, beta0 is randomly chosen uniformly between beta_bnds.}
 
-\item{phi_bnds}{Bounds for initalization of phi0 and optimization bounds. If not specified, defaults to 0 to 1.}
-
 \item{beta_bnds}{Bounds for initalization of beta0 and optimization bounds. If not specified, defaults to 0 to 1.}
-
-\item{verbose}{Boolean of whether or not to print out coordinate descent optimization results.}
 }
 \value{
 A list of output:
 \itemize{
 \item{phi_hat:} MLE of phi=alpha/beta
 \item{beta_hat:} MLE of beta
-\item{ll:} value of negative of log-likelihood at MLEs.
+\item{ll:} value of negative of log-profile-likelihood at MLE.
 }
 }
 \description{
-Estimation procedure calculates maximum likelihood estimates via coordinate descent on phi and beta with some number of random restarts and chooses the estimates with the highest log-likelihood.
+Estimation procedure calculates maximum likelihood estimates via profile likelihood on beta.
 }

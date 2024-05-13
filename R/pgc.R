@@ -125,7 +125,7 @@ get_mle <- function(T_seq, N_seq, n_seq, phi0 = NULL, beta0 = NULL, phi_bnds = N
 #' \item{beta_hat:} MLE of beta
 #' \item{ll:} value of negative of log-likelihood at MLEs. 
 #' }
-estimate <- function(T_seq, N_seq, n_seq, maxiter = 1000, N_restart = 3, phi0 = NULL,
+estimate_full <- function(T_seq, N_seq, n_seq, maxiter = 1000, N_restart = 3, phi0 = NULL,
     beta0 = NULL, phi_bnds = NULL, beta_bnds = NULL, verbose = FALSE) {
 
     opts <- lapply(1:N_restart, function(i) {
@@ -144,5 +144,55 @@ estimate <- function(T_seq, N_seq, n_seq, maxiter = 1000, N_restart = 3, phi0 = 
 
     return(list(phi_hat = phi_estimate, beta_hat = beta_estimate, ll = opts[[besti]]$ll))
 }
+
+#' Estimate poisson parameters phi = alpha/beta and beta from sequence of times (T), number of centers (N), and number of recruits (n), across a collection of clinical trials.
+#'
+#' Estimation procedure calculates maximum likelihood estimates via profile likelihood on beta.
+#' 
+#' @export
+#' @param T_seq Sequence of recruitment times across trials.
+#' @param N_seq Sequence of number of centers across trials.
+#' @param n_seq Sequence of number of recruits across trials.
+#' @param beta0 Initial estimate for beta for coordinate descent. If not specified, beta0 is randomly chosen uniformly between beta_bnds.
+#' @param beta_bnds Bounds for initalization of beta0 and optimization bounds. If not specified, defaults to 0 to 1. 
+#' @return A list of output:
+#' \itemize{
+#' \item{phi_hat:} MLE of phi=alpha/beta
+#' \item{beta_hat:} MLE of beta
+#' \item{ll:} value of negative of log-profile-likelihood at MLE. 
+#' }
+#' @export
+estimate <- function(T_seq, N_seq, n_seq, beta0 = NULL, beta_bnds = NULL) {
+
+    lambda_bar_seq <- n_seq/(N_seq * T_seq)
+
+    c_beta <- function(beta) N_seq * T_seq/(T_seq + beta)
+    p_beta <- function(beta) c_beta(beta)/sum(c_beta(beta))
+
+    phi_beta <- function(beta) {
+        return(sum(lambda_bar_seq * p_beta(beta)))
+    }
+
+    ll_beta <- function(beta) nloglik_phi(T_seq, N_seq, n_seq, phi_beta(beta), beta)
+    # initial randomized alpha and beta starting values
+
+    if (is.null(beta_bnds))
+        beta_bnds <- c(0, 1)
+
+    if (is.null(beta0))
+        beta0 <- stats::runif(1, beta_bnds[1], beta_bnds[2])
+
+    opts <- list(algorithm = "NLOPT_LN_COBYLA", xtol_rel = 1e-07, maxeval = 100)
+    opt.out <- nloptr::nloptr(x0 = beta0, eval_f = ll_beta, lb = 0, ub = Inf, opts = opts)
+    # opt.out <- stats::optim(beta0, ll_beta, method = 'BFGS')
+
+    beta_estimate <- opt.out$solution
+    phi_estimate <- phi_beta(beta_estimate)
+    llfin <- opt.out$objective
+
+    return(list(phi_hat = phi_estimate, beta_hat = beta_estimate, ll = llfin))
+
+}
+
 
 

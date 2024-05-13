@@ -67,8 +67,7 @@ head(T_seq)
 We can estimate the MLEs for $\phi=\frac{\alpha}{\beta}$ and $\beta$ using `pgc`
 
 ```{r}
-out = pgc::estimate(T_seq=T_seq,N_seq=N_seq,n_seq=n_seq,
-                    verbose=TRUE)
+out = pgc::estimate(T_seq=T_seq,N_seq=N_seq,n_seq=n_seq)
 ```
 
 and then look at the output
@@ -78,3 +77,8 @@ out
 ```
 
 We can see that these estimates are pretty close to our true values for $\phi$ and $\beta$.
+
+```{r}
+true_alpha/true_beta
+true_beta
+```
